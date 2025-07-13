@@ -8,19 +8,16 @@ This guide provides instructions for deploying the backend server in a resource-
 
 ---
 
-### Scenario 1: Go Backend + CouchDB
+### Scenario 1: Python/FastAPI Backend + CouchDB
 
-This is the most robust and recommended setup. Go provides a single, efficient binary, and CouchDB provides a battle-tested sync solution.
+This is a robust and highly performant setup. FastAPI provides a fast, modern API, and CouchDB provides a battle-tested sync solution.
 
-**1. Install Go:**
+**1. Install Python & Pip:**
 
 ```bash
-# On your development machine (not the Pi), build the Go application for Linux ARM
-GOOS=linux GOARCH=arm GOARM=6 go build -o pos-server .
-
 # On the Raspberry Pi
 sudo apt-get update
-sudo apt-get install -y golang
+sudo apt-get install -y python3 python3-pip python3-venv
 ```
 
 **2. Install CouchDB:**
@@ -38,34 +35,33 @@ sudo apt-get install -y couchdb
 
 *   Access the CouchDB web interface (Fauxton) at `http://<pi_ip_address>:5984/_utils/`.
 *   Create a new database named `pos-db`.
-*   Create a new user with read/write permissions to the `pos-db` database. This user will be used by the Go backend.
+*   Create a new user with read/write permissions to the `pos-db` database. This user will be used by the FastAPI backend.
 
-**4. Deploy and Run the Go Application:**
+**4. Deploy and Run the FastAPI Application:**
 
-*   Copy the `pos-server` binary from your development machine to the Raspberry Pi using `scp`.
-*   Create a configuration file (`config.json`) for the Go application:
-    ```json
-    {
-      "db_username": "your_couchdb_user",
-      "db_password": "your_couchdb_password",
-      "db_host": "127.0.0.1",
-      "db_port": 5984,
-      "jwt_secret": "a_very_secret_key"
-    }
-    ```
-*   Run the application:
+*   Copy your Python project files to the Raspberry Pi.
+*   Create a virtual environment:
     ```bash
-    ./pos-server
+    python3 -m venv venv
+    source venv/bin/activate
+    ```
+*   Install dependencies:
+    ```bash
+    pip install -r requirements.txt
+    ```
+*   Run the application using an ASGI server like `uvicorn`:
+    ```bash
+    uvicorn main:app --host 0.0.0.0 --port 8080
     ```
 *   **For production:** Use a process manager like `systemd` to run the application as a service, so it automatically restarts on boot or if it crashes.
 
 ---
 
-### Scenario 2: Node.js Backend + PouchDB-Server
+### Scenario 2: Python/FastAPI Backend + PouchDB-Server
 
-This is a lighter-weight alternative, ideal for even more constrained environments or if you prefer a pure JavaScript stack.
+This is a lighter-weight alternative if you want to avoid a full CouchDB installation.
 
-**1. Install Node.js:**
+**1. Install Node.js (for PouchDB-Server):**
 
 ```bash
 # On the Raspberry Pi
@@ -73,16 +69,7 @@ curl -sL https://deb.nodesource.com/setup_18.x | sudo -E bash -
 sudo apt-get install -y nodejs
 ```
 
-**2. Set up the Node.js Application:**
-
-*   Copy your Node.js project files to the Raspberry Pi.
-*   Install dependencies:
-    ```bash
-    npm install
-    ```
-*   The application should be configured to use `pouchdb-server`. You can either run `pouchdb-server` as a separate process or embed it within your Node.js application.
-
-**3. Running `pouchdb-server`:**
+**2. Install and Run `pouchdb-server`:**
 
 *   Install `pouchdb-server` globally:
     ```bash
@@ -92,33 +79,24 @@ sudo apt-get install -y nodejs
     ```bash
     pouchdb-server --port 5984 --host 0.0.0.0
     ```
-    This will store data in the current directory. You can specify a different directory with the `-d` flag.
+    This can be managed with a process manager like `pm2`.
 
-**4. Deploy and Run the Node.js Application:**
+**3. Deploy and Run the FastAPI Application:**
 
-*   If your Node.js app is separate from `pouchdb-server`, configure it to connect to `http://127.0.0.1:5984`.
-*   Run your application:
-    ```bash
-    node server.js
-    ```
-*   **For production:** Use a process manager like `pm2` to manage the Node.js process.
-    ```bash
-    npm install -g pm2
-    pm2 start server.js
-    pm2 startup # This will generate a command to run on boot
-    ```
+*   Follow the same steps as in Scenario 1 to deploy the FastAPI application.
+*   Configure your FastAPI application to connect to the `pouchdb-server` instance at `http://127.0.0.1:5984`.
 
 ---
 
-### PWA Deployment
+### PWA (Vue.js) Deployment
 
-The PWA itself is just a set of static files (HTML, CSS, JavaScript).
+The Vue.js PWA is a set of static files (HTML, CSS, JavaScript).
 
 1.  **Build the PWA:**
-    *   Run the build command for your chosen framework (e.g., `npm run build` for Svelte).
+    *   On your development machine, run the build command: `npm run build`.
 2.  **Deploy the Static Files:**
-    *   You can serve the static files from the same Go or Node.js backend.
-    *   Alternatively, you can use a lightweight web server like `nginx` or `caddy` on the Raspberry Pi to serve the files. `caddy` is particularly easy to set up with automatic HTTPS.
+    *   You can serve the static files from the same FastAPI backend or use a dedicated web server.
+    *   Using a lightweight web server like `nginx` or `caddy` is recommended.
 
 **Example with Caddy:**
 
@@ -138,8 +116,11 @@ Add the following to your `Caddyfile`:
 
 ```
 your_domain_or_pi_ip_address {
-    root * /path/to/your/pwa/build
+    # Path to your Vue.js build output (usually in the 'dist' folder)
+    root * /path/to/your/pwa/dist
     file_server
+
+    # Proxy API requests to the FastAPI backend
     reverse_proxy /api/* http://localhost:8080
 }
 ```

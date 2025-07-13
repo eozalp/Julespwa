@@ -2,6 +2,12 @@
 
 This project is a Point-of-Sale and Inventory Management Progressive Web App, designed to be mobile-first, offline-first, and run on resource-constrained hardware like Raspberry Pi devices.
 
+## Technology Stack
+
+*   **Frontend:** Vue.js 3 PWA
+*   **Backend:** Python (FastAPI)
+*   **Database:** CouchDB / PouchDB for seamless offline-first data synchronization.
+
 ## Project Documentation
 
 *   [Architecture](architecture.md)
@@ -13,22 +19,26 @@ This project is a Point-of-Sale and Inventory Management Progressive Web App, de
 
 ## Project Structure
 
-*   `/pwa`: Contains the Svelte-based PWA.
-*   `/backend`: Contains the Go-based backend server.
+*   `/pwa`: Contains the Vue.js-based PWA.
+*   `/backend`: Contains the Python-based FastAPI backend server.
 
 ## Getting Started
 
-1.  **Backend:**
-    *   Navigate to the `backend` directory.
-    *   Run `go mod tidy`.
-    *   Run `go run main.go`.
-
-2.  **PWA:**
-    *   Navigate to the `pwa` directory.
-    *   Run `npm install`.
-    *   Run `npm run dev`.
-
-3.  **Database:**
+1.  **Database Setup:**
     *   This project is designed to work with CouchDB or a PouchDB-Server.
     *   Follow the [Deployment Guide](deployment_guide.md) to set up your database.
-    *   Make sure the PWA's service worker and the backend are configured with the correct database URL.
+    *   Ensure the PWA's service worker and the backend are configured with the correct database URL.
+
+2.  **Backend (FastAPI):**
+    *   Navigate to the `backend` directory.
+    *   Create a virtual environment: `python3 -m venv venv`
+    *   Activate it: `source venv/bin/activate`
+    *   Install dependencies: `pip install -r requirements.txt`
+    *   Run the server: `uvicorn main:app --reload`
+
+3.  **PWA (Vue.js):**
+    *   Navigate to the `pwa` directory.
+    *   Run `npm install`.
+    *   Run `npm run serve` to start the development server.
+
+The PWA will be available at `http://localhost:8081` (or another port if 8080 is in use), and the backend API will be at `http://localhost:8000`.
