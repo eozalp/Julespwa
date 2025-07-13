@@ -1,0 +1,20 @@
+{
+  "name": "pos-pwa",
+  "version": "1.0.0",
+  "description": "A Point-of-Sale PWA",
+  "main": "index.js",
+  "scripts": {
+    "dev": "svelte-kit dev",
+    "build": "svelte-kit build",
+    "start": "svelte-kit start"
+  },
+  "devDependencies": {
+    "@sveltejs/kit": "next",
+    "svelte": "^3.44.0"
+  },
+  "dependencies": {
+    "dexie": "^3.2.2",
+    "pouchdb-browser": "^7.2.2",
+    "jsqr": "^1.4.0"
+  }
+}
