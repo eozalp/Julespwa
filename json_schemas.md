@@ -11,7 +11,7 @@ Here are the proposed JSON schemas for the core data models. They are designed t
 
 ### 1. Product Schema
 
-This schema represents a product in the inventory.
+This schema represents a product in the inventory. It now includes a `pictures` field to store multiple base64-encoded images.
 
 ```json
 {
@@ -23,7 +23,10 @@ This schema represents a product in the inventory.
   "price": 1.99,
   "cost": 0.75,
   "taxable": true,
-  "imageUrl": "/images/products/apple.jpg",
+  "pictures": [
+    "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD...",
+    "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD..."
+  ],
   "categoryId": "cat:fruit",
   "supplierId": "sup:local-farms",
   "stock": 150,
@@ -38,7 +41,7 @@ This schema represents a product in the inventory.
 *   `sku`: Stock Keeping Unit, a unique identifier for the product.
 *   `price`, `cost`: The retail price and the cost of the product.
 *   `taxable`: A boolean to indicate if sales tax should be applied.
-*   `imageUrl`: A relative path to the product image. The service worker will cache these.
+*   **`pictures`**: An array of base64-encoded strings. Each string represents a full image, allowing for multiple pictures per product. This is ideal for an offline-first approach as the images are stored directly with the product data.
 *   `categoryId`, `supplierId`: Foreign keys to other documents (e.g., `category:fruit`, `supplier:local-farms`).
 *   `stock`: The current stock level. This will be updated by sales and stock entries.
 
@@ -61,14 +64,6 @@ This schema represents a change in the stock level of a product, either from a n
   "updatedAt": "2023-10-27T11:00:00Z"
 }
 ```
-
-**Fields:**
-
-*   `productId`: The ID of the product this stock entry is for.
-*   `type`: The type of stock entry.
-*   `quantity`: The change in quantity. Can be positive or negative.
-*   `notes`: Optional notes about the stock entry.
-*   `userId`: The ID of the user who made the stock entry.
 
 ---
 
@@ -104,13 +99,6 @@ This schema represents a single sales transaction, which can include multiple it
 }
 ```
 
-**Fields:**
-
-*   `items`: An array of objects, where each object represents a product sold in the transaction. We denormalize `name` and `price` here to ensure that the sale record is immutable, even if the product details change later.
-*   `subtotal`, `tax`, `total`: The financial details of the sale.
-*   `paymentMethod`: How the sale was paid for.
-*   `userId`: The ID of the user who processed the sale.
-
 ---
 
 ### 4. User Schema
@@ -128,12 +116,3 @@ A simple schema for users.
   "updatedAt": "2023-10-26T09:00:00Z"
 }
 ```
-
-**Fields:**
-
-*   `name`: The user's name.
-*   `role`: The user's role, which can be used to control access to certain features.
-*   `pin`: A hashed PIN for local authentication. **Never store plain-text PINs.**
-*   `_id` is human-readable for easier debugging.
-
-These schemas are designed to be efficient and provide a solid foundation for the application's data model. They are normalized where it makes sense (e.g., `productId` in `StockEntry` and `Sale`) but also denormalized where necessary (e.g., `items` in `Sale`) to ensure data integrity and performance.
