@@ -13,12 +13,12 @@
 </template>
 
 <script>
-// import BarcodeScanner from '@/components/BarcodeScanner.vue';
-// import db from '@/db';
+import BarcodeScanner from '@/components/BarcodeScanner.vue';
+import db from '@/db';
 
 export default {
   name: 'ReceivingView',
-  // components: { BarcodeScanner },
+  components: { BarcodeScanner },
   data() {
     return {
       scannedProduct: null,
@@ -27,19 +27,36 @@ export default {
   },
   methods: {
     async onBarcodeScanned(barcode) {
-      // const product = await db.products.where('sku').equals(barcode).first();
-      // this.scannedProduct = product;
-      console.log('Scanned barcode:', barcode);
+      const product = await db.products.where('sku').equals(barcode).first();
+      if (product) {
+        this.scannedProduct = product;
+      } else {
+        alert(`Product with barcode ${barcode} not found.`);
+        this.scannedProduct = null;
+      }
     },
     async receiveStock() {
-      // await db.stockEntries.add({
-      //   productId: this.scannedProduct._id,
-      //   type: 'intake',
-      //   quantity: this.quantity,
-      //   createdAt: new Date(),
-      // });
-      // await db.products.update(this.scannedProduct._id, { stock: this.scannedProduct.stock + this.quantity });
-      console.log(`Received ${this.quantity} of ${this.scannedProduct.name}`);
+      if (!this.scannedProduct || this.quantity <= 0) {
+        alert("Please scan a product and enter a valid quantity.");
+        return;
+      }
+
+      await db.stockEntries.add({
+        productId: this.scannedProduct._id,
+        type: 'intake',
+        quantity: this.quantity,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+
+      await db.products.update(this.scannedProduct._id, {
+        stock: this.scannedProduct.stock + this.quantity,
+        updatedAt: new Date().toISOString(),
+      });
+
+      alert(`${this.quantity} units of ${this.scannedProduct.name} have been received.`);
+      this.scannedProduct = null;
+      this.quantity = 0;
     },
   },
 };
