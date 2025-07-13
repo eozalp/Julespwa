@@ -65,11 +65,35 @@ This document outlines the UI/UX design approach for the POS PWA, focusing on th
 
 ---
 
-### 5. Full-Text Search
+### 5. Product Add/Edit Form
+
+*   **Keyboard-Friendly:** All form fields will be navigable using the `Tab` key. `Enter` will submit the form, and `Esc` will close it.
+*   **Drag-and-Drop Images:** A dedicated area in the form will allow users to drag and drop image files directly from their desktop. A fallback "upload" button will also be available.
+*   **Smart Category and Tag System:**
+    *   **Categories:** A searchable dropdown (`<select>` or a custom component) will be used for assigning a product to a single category.
+    *   **Tags:** A dedicated input field will allow users to type tags. As they type, a list of existing tags will appear as suggestions. Pressing `Enter` or a comma will convert the text into a "tag chip" in the input field. This provides a fast and intuitive way to manage tags.
+
+### 6. Full-Text Search
 
 *   A prominent search bar will be available on the "Products" and "Sell" screens.
 *   As the user types, the search results will update in real-time.
-*   The search will match on product name, description, and SKU.
+*   The search will match on product name, description, SKU, and tags.
 *   The search will be performed entirely on the client-side for offline functionality.
 
 This UI/UX approach ensures that the application is intuitive, efficient, and meets all the specified functional requirements, with a strong emphasis on the offline, picture-centric, and keyboard-friendly aspects of the design.
+
+---
+
+### 6. Insights Page
+
+*   **Layout:** The "Insights" page will feature a dashboard-style layout. At the top, there will be controls for sorting and filtering. The main area will be a grid of `ProductCard` components.
+*   **Hero-Pictured Product Cards:** Each `ProductCard` will prominently display the product's primary image (the first one in the `pictures` array). It will also show key performance metrics, such as "Total Units Sold" and "Total Revenue."
+*   **Sorting Options:** Users will be able to sort the product list by:
+    *   Best Selling (most units sold)
+    *   Highest Revenue
+    *   Most Recently Sold
+    *   Stock Level (High to Low, Low to High)
+*   **Filtering Options:** Users will be able to filter the product list by:
+    *   Category
+    *   Supplier
+    *   Date Range of Sales

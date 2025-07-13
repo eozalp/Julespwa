@@ -11,7 +11,7 @@ Here are the proposed JSON schemas for the core data models. They are designed t
 
 ### 1. Product Schema
 
-This schema represents a product in the inventory. It now includes a `pictures` field to store multiple base64-encoded images.
+This schema represents a product in the inventory. It now includes a `tags` field and a `categoryId`.
 
 ```json
 {
@@ -24,10 +24,10 @@ This schema represents a product in the inventory. It now includes a `pictures` 
   "cost": 0.75,
   "taxable": true,
   "pictures": [
-    "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD...",
     "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD..."
   ],
-  "categoryId": "cat:fruit",
+  "categoryId": "category:fruit",
+  "tags": ["organic", "fresh", "local"],
   "supplierId": "sup:local-farms",
   "stock": 150,
   "createdAt": "2023-10-27T10:00:00Z",
@@ -37,19 +37,31 @@ This schema represents a product in the inventory. It now includes a `pictures` 
 
 **Fields:**
 
-*   `name`, `description`: Human-readable product information.
-*   `sku`: Stock Keeping Unit, a unique identifier for the product.
-*   `price`, `cost`: The retail price and the cost of the product.
-*   `taxable`: A boolean to indicate if sales tax should be applied.
-*   **`pictures`**: An array of base64-encoded strings. Each string represents a full image, allowing for multiple pictures per product. This is ideal for an offline-first approach as the images are stored directly with the product data.
-*   `categoryId`, `supplierId`: Foreign keys to other documents (e.g., `category:fruit`, `supplier:local-farms`).
-*   `stock`: The current stock level. This will be updated by sales and stock entries.
+*   **`tags`**: An array of strings for user-defined tags.
+*   **`categoryId`**: A foreign key to a `Category` document.
 
 ---
 
-### 2. StockEntry Schema
+### 2. Category Schema
 
-This schema represents a change in the stock level of a product, either from a new shipment (intake) or a manual adjustment (e.g., stock count).
+A simple schema for product categories.
+
+```json
+{
+  "_id": "category:fruit",
+  "_rev": "1-xyz...",
+  "name": "Fruit",
+  "description": "Fresh and frozen fruit.",
+  "createdAt": "2023-10-26T09:00:00Z",
+  "updatedAt": "2023-10-26T09:00:00Z"
+}
+```
+
+---
+
+### 3. StockEntry Schema
+
+This schema represents a change in the stock level of a product.
 
 ```json
 {
@@ -67,9 +79,9 @@ This schema represents a change in the stock level of a product, either from a n
 
 ---
 
-### 3. Sale Schema
+### 4. Sale Schema
 
-This schema represents a single sales transaction, which can include multiple items.
+This schema represents a single sales transaction.
 
 ```json
 {
@@ -81,18 +93,12 @@ This schema represents a single sales transaction, which can include multiple it
       "name": "Organic Apples",
       "quantity": 2,
       "price": 1.99
-    },
-    {
-      "productId": "product:uuid-67890",
-      "name": "Whole Wheat Bread",
-      "quantity": 1,
-      "price": 3.49
     }
   ],
-  "subtotal": 7.47,
-  "tax": 0.60,
-  "total": 8.07,
-  "paymentMethod": "cash", // "cash" | "card"
+  "subtotal": 3.98,
+  "tax": 0.32,
+  "total": 4.30,
+  "paymentMethod": "cash",
   "userId": "user:john-doe",
   "createdAt": "2023-10-27T12:30:00Z",
   "updatedAt": "2023-10-27T12:30:00Z"
@@ -101,7 +107,7 @@ This schema represents a single sales transaction, which can include multiple it
 
 ---
 
-### 4. User Schema
+### 5. User Schema
 
 A simple schema for users.
 
